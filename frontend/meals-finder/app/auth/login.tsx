@@ -12,12 +12,15 @@ import Colors, { backWhite, primaryOrange } from "@/constants/Colors";
 import { FormLabel } from "@/components/FormLabel";
 import { FormTextInput } from "@/components/FormTextInput";
 import { FormButton } from "@/components/FormButton";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
+  const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const validateForm = () => {
@@ -39,16 +42,23 @@ export default function LoginScreen() {
   };
 
   const handleLogin = async () => {
+    setSubmitError("");
     if (!validateForm()) {
       return;
     }
 
     setLoading(true);
     try {
-      // Call POST /auth/login endpoint
+      await login({
+        identifier: email.trim(),
+        password,
+        type: "EMAIL",
+      });
       router.replace("/");
     } catch (error) {
-      console.error("Error:", error);
+      const message =
+        error instanceof Error ? error.message : "Não foi possível entrar";
+      setSubmitError(message);
     } finally {
       setLoading(false);
     }
@@ -103,6 +113,10 @@ export default function LoginScreen() {
               <Text style={styles.errorText}>{errors.password}</Text>
             ) : null}
           </View>
+
+          {submitError ? (
+            <Text style={styles.submitErrorText}>{submitError}</Text>
+          ) : null}
 
           <FormButton
             title="Entrar"
@@ -169,6 +183,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Poppins_Regular",
     marginTop: 4,
+  },
+  submitErrorText: {
+    color: "#ff6b6b",
+    fontSize: 13,
+    fontFamily: "Poppins_Regular",
+    textAlign: "center",
+    marginBottom: 8,
   },
   buttonContainer: {
     marginTop: 16,

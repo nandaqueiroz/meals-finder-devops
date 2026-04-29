@@ -1,8 +1,9 @@
 import { RegistrationFormData } from "@/context/RegistrationContext";
 
-// Base URL should be configured from environment
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080/api";
+  process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080";
+
+export type LoginType = "EMAIL" | "USERNAME" | "PHONE_NUMBER";
 
 export interface ClientRegisterDTO {
   email: string;
@@ -24,92 +25,82 @@ export interface EstablishmentRegisterDTO {
 }
 
 export interface CredentialsDTO {
-  email: string;
+  identifier: string;
   password: string;
+  type: LoginType;
+}
+
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+  username: string;
+  phoneNumber?: string | null;
+  profilePictureUrl?: string | null;
+  bio?: string | null;
+  accountConfirmed?: boolean;
+  accountCreationDate?: string;
+  type?: "CLIENT" | "ESTABLISHMENT" | "USER";
+  name?: string | null;
+  [key: string]: unknown;
+}
+
+async function parseError(response: Response, fallback: string): Promise<string> {
+  try {
+    const body = await response.json();
+    if (body && typeof body === "object") {
+      const candidate =
+        (body as { message?: string; error?: string }).message ??
+        (body as { message?: string; error?: string }).error;
+      if (candidate) return candidate;
+    }
+  } catch {
+    // body not JSON; ignore and use fallback
+  }
+  return fallback;
 }
 
 class AuthService {
-  /**
-   * Register a new client
-   */
   async registerClient(data: ClientRegisterDTO) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/register/client`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to register client");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
+    const response = await fetch(`${API_BASE_URL}/auth/register/client`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error(await parseError(response, "Falha ao registrar cliente"));
     }
+    return await response.json();
   }
 
-  /**
-   * Register a new establishment
-   */
   async registerEstablishment(data: EstablishmentRegisterDTO) {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/auth/register/establishment`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        },
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to register establishment");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Login with email and password
-   */
-  async login(credentials: CredentialsDTO) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    const response = await fetch(
+      `${API_BASE_URL}/auth/register/establishment`,
+      {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Login failed");
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+    );
+    if (!response.ok) {
+      throw new Error(
+        await parseError(response, "Falha ao registrar estabelecimento"),
+      );
     }
+    return await response.json();
   }
 
-  /**
-   * Register a new user from multi-step form
-   */
+  async login(credentials: CredentialsDTO): Promise<AuthenticatedUser> {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
+    if (!response.ok) {
+      throw new Error(await parseError(response, "Credenciais inválidas"));
+    }
+    return (await response.json()) as AuthenticatedUser;
+  }
+
   async registerFromForm(
     formData: RegistrationFormData,
     accountType: "client" | "establishment",
@@ -123,16 +114,15 @@ class AuthService {
       };
       return this.registerClient(clientData);
     } else {
-      // For establishment, you may need additional fields from the form
       const establishmentData: EstablishmentRegisterDTO = {
-        cnpj: "", // Should be collected in the form
+        cnpj: "",
         email: formData.email,
         username: formData.username,
         password: formData.password,
-        name: "", // Should be collected in the form
-        type: "", // Should be collected in the form
-        isDelivery: false, // Should be collected in the form
-        isInPerson: true, // Should be collected in the form
+        name: "",
+        type: "",
+        isDelivery: false,
+        isInPerson: true,
         phoneNumber: formData.phone || undefined,
       };
       return this.registerEstablishment(establishmentData);
