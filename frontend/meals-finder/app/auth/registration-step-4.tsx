@@ -17,9 +17,9 @@ import Colors, {
 } from "@/constants/Colors";
 import { FormButton } from "@/components/FormButton";
 
-export default function RegistrationStep3() {
+export default function RegistrationStep4() {
   const router = useRouter();
-  const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
+  const [selectedDislikes, setSelectedDislikes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const foodPreferences = [
@@ -35,22 +35,22 @@ export default function RegistrationStep3() {
     "gourmet",
   ];
 
-  const togglePreference = (preference: string) => {
-    setSelectedPreferences((prev) =>
+  const toggleDislike = (preference: string) => {
+    setSelectedDislikes((prev) =>
       prev.includes(preference)
         ? prev.filter((p) => p !== preference)
         : [...prev, preference],
     );
   };
 
-  const handleNext = async () => {
-    if (selectedPreferences.length < 3) {
+  const handleFinish = async () => {
+    if (selectedDislikes.length < 3) {
       return;
     }
 
     setLoading(true);
     try {
-      router.push("/auth/registration-step-4");
+      router.replace("/(tabs)");
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -59,7 +59,7 @@ export default function RegistrationStep3() {
   };
 
   const handleSkip = () => {
-    router.push("/auth/registration-step-4");
+    router.replace("/(tabs)");
   };
 
   return (
@@ -73,38 +73,38 @@ export default function RegistrationStep3() {
       >
         <View style={styles.headerSection}>
           <Text style={[styles.title, { color: primaryOrange }]}>
-            Quase lá!
+            Último passo!
           </Text>
           <Text style={[styles.subtitle, { color: darkGrey }]}>
-            Selecione suas preferências:
+            Selecione suas restrições:
           </Text>
         </View>
 
         <Text style={[styles.description, { color: darkGrey }]}>
-          Selecione ao menos 3 tipos de comidas que você gosta e quer ver no seu
-          feed!
+          Selecione ao menos 3 tipos de comidas que você não gosta e não quer
+          ver no seu feed!
         </Text>
 
         <View style={[styles.card, { backgroundColor: "#fff" }]}>
           <Text style={[styles.progressIndicator, { color: primaryGreen }]}>
-            1/2
+            2/2
           </Text>
 
           <View style={styles.preferencesGrid}>
             {foodPreferences.map((preference) => (
               <Pressable
                 key={preference}
-                onPress={() => togglePreference(preference)}
+                onPress={() => toggleDislike(preference)}
                 style={[
                   styles.preferenceButton,
-                  selectedPreferences.includes(preference) &&
+                  selectedDislikes.includes(preference) &&
                     styles.preferenceButtonSelected,
                 ]}
               >
                 <Text
                   style={[
                     styles.preferenceText,
-                    selectedPreferences.includes(preference) &&
+                    selectedDislikes.includes(preference) &&
                       styles.preferenceTextSelected,
                   ]}
                 >
@@ -114,7 +114,7 @@ export default function RegistrationStep3() {
                   name="plus"
                   size={12}
                   color={
-                    selectedPreferences.includes(preference) ? "#fff" : darkGrey
+                    selectedDislikes.includes(preference) ? "#fff" : darkGrey
                   }
                   style={styles.plusIcon}
                 />
@@ -131,10 +131,10 @@ export default function RegistrationStep3() {
             />
 
             <FormButton
-              title="Próximo"
-              onPress={handleNext}
+              title="Concluir"
+              onPress={handleFinish}
               loading={loading}
-              disabled={selectedPreferences.length < 3}
+              disabled={selectedDislikes.length < 3}
               containerStyle={styles.nextButton}
             />
           </View>
