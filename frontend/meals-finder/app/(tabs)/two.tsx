@@ -1,31 +1,44 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView } from "react-native";
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+export default function ProfileScreen() {
+  const colorScheme = useColorScheme() ?? "light";
+  const colors = Colors[colorScheme as keyof typeof Colors];
 
-export default function TabTwoScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/two.tsx" />
-    </View>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      <Text style={[styles.title, { color: colors.text }]}>Meu Perfil</Text>
+      <View style={styles.separator} />
+      <Text style={[styles.message, { color: colors.text }]}>
+        Veja e edite seu perfil aqui
+      </Text>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
   },
   separator: {
-    marginVertical: 30,
+    marginVertical: 16,
     height: 1,
-    width: '80%',
+    width: "80%",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+  },
+  message: {
+    fontSize: 16,
+    textAlign: "center",
   },
 });
