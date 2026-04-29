@@ -1,31 +1,44 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView } from "react-native";
+import Colors, { primaryOrange } from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+export default function FollowingScreen() {
+  const colorScheme = useColorScheme() ?? "light";
+  const colors = Colors[colorScheme as keyof typeof Colors];
 
-export default function TabOneScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      <Text style={[styles.title, { color: colors.text }]}>Seguindo</Text>
+      <View style={styles.separator} />
+      <Text style={[styles.message, { color: colors.text }]}>
+        Veja as atualizações de quem você segue
+      </Text>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
   },
   separator: {
-    marginVertical: 30,
+    marginVertical: 16,
     height: 1,
-    width: '80%',
+    width: "80%",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+  },
+  message: {
+    fontSize: 16,
+    textAlign: "center",
   },
 });
