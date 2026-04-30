@@ -31,16 +31,16 @@ public class Client extends User {
     @Enumerated(EnumType.STRING)
     private Set<FoodTag> dislikedFoodTags = new HashSet<>();
 
-    @Formula("(select coalesce((select count(*) from follows f where f.follower_id = id), 0))")
+    @Formula("(select coalesce((select count(*) from follows f where f.follower_id = {alias}.user_id), 0))")
     private long followingCount;
 
-    @Formula("(select coalesce((select count(*) from follows f2 where f2.following_id = id), 0))")
+    @Formula("(select coalesce((select count(*) from follows f2 where f2.following_id = {alias}.user_id), 0))")
     private long followedCount;
 
-    @Formula("(select coalesce((select count(*) from reviews r where r.user_id = id), 0))")
+    @Formula("(select coalesce((select count(*) from reviews r where r.user_id = {alias}.user_id), 0))")
     private long reviewsPostedCount;
 
-    @Formula("(select coalesce((select count(*) from saved_reviews s where s.user_id = id), 0))")
+    @Formula("(select coalesce((select count(*) from saved_reviews s where s.user_id = {alias}.user_id), 0))")
     private long reviewsSavedCount;
 
     public Client() {
